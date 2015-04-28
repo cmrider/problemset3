@@ -1,9 +1,10 @@
 ## Load Gapminder Data
+
 > gdURL <- "http://www.stat.ubc.ca/~jenny/notOcto/STAT545A/examples/gapminder/data/gapminderDataFiveYear.txt"
 > gDat <- read.delim(file = gdURL)
+
 ## View the structure of gDat to ensure successful import
 > str(gDat)
-## Output:
 'data.frame':  1704 obs. of  6 variables:
 $ country  : Factor w/ 142 levels "Afghanistan",..: 1 1 1 1 1 1 1 1 1 1 ...
 $ year     : int  1952 1957 1962 1967 1972 1977 1982 1987 1992 1997 ...
@@ -16,7 +17,6 @@ $ gdpPercap: num  779 821 853 836 740 ...
 
 ## Store snippet of data (I choose the US, because, well, 'Murica!)
 > (snippet<-subset(gDat, country=="United States"))
-## Output:
 country year       pop continent lifeExp gdpPercap
 1609 United States 1952 157553000  Americas  68.440  13990.48
 1610 United States 1957 171984000  Americas  69.490  14847.13
@@ -41,7 +41,6 @@ country year       pop continent lifeExp gdpPercap
 > install.packages("Rcpp")
 > library(Rcpp)
 > (maxLeByCont <- ddply(gDat, ~ continent, summarize, maxLifeExp = max(lifeExp)))
-## Output:
   continent maxLifeExp
 1    Africa     76.442
 2  Americas     80.653
@@ -51,18 +50,17 @@ country year       pop continent lifeExp gdpPercap
 
 ## View structure of data:
 > str(maxLeByCont)
-## Output:
 'data.frame':  5 obs. of  2 variables:
 $ continent : Factor w/ 5 levels "Africa","Americas",..: 1 2 3 4 5
 $ maxLifeExp: num  76.4 80.7 82.6 81.8 81.2
+
 ## Examine the observation names
 > levels(maxLeByCont$continent)
-## Output:
+
 [1] "Africa"   "Americas" "Asia"     "Europe"   "Oceania" 
 
 ## Compute GDP per capita by continent
 > (GDPperCapitabyCont <- ddply(gDat, ~continent, summarize, minGDP = min(gdpPercap)))
-## Output:
 continent     minGDP
 1    Africa   241.1659
 2  Americas  1201.6372
@@ -72,17 +70,16 @@ continent     minGDP
 
 ## Count the number of countries in gDat:
 > ddply(gDat, ~continent, summarize, nUniqCountries = length(unique(country)))
-## Output:
 continent   nUniqCountries
 1    Africa             52
 2  Americas             25
 3      Asia             33
 4    Europe             30
 5   Oceania              2
+
 ## Without summarize
 > ddply(gDat, ~ continent,
         function(x) return(c(nUniqCountries = length(unique(x$country)))))
-## Output: 
 continent   nUniqCountries
 1    Africa             52
 2  Americas             25
@@ -94,7 +91,6 @@ continent   nUniqCountries
 > ddply(gDat, ~ continent, summarize,
       minLifeExp = min(lifeExp), maxLifeExp = max(lifeExp),
       medGdpPercap = median(gdpPercap))
-## Output: 
   continent minLifeExp maxLifeExp medGdpPercap
 1    Africa     23.599     76.442     1192.138
 2  Americas     37.579     80.653     5465.510
@@ -103,10 +99,10 @@ continent   nUniqCountries
 5   Oceania     69.120     81.235    17983.304
 
 ## Putting It All Together
+
 ## Create sub-data.frame
 > cCountry <- "United States" (c for chelsea, versus j for what I'm assuming was jenny)
 > (cDat <- subset(gDat, country == cCountry))
-## Output: 
            country year       pop continent lifeExp gdpPercap
 1609 United States 1952 157553000  Americas  68.440  13990.48
 1610 United States 1957 171984000  Americas  69.490  14847.13
@@ -130,7 +126,6 @@ continent   nUniqCountries
 ## Fit a linear model
 > cFit <- lm(lifeExp ~ year, cDat)
 > summary(cFit)
-## Output:
 Call:
   lm(formula = lifeExp ~ year, data = cDat)
 
@@ -148,12 +143,12 @@ Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’
 Residual standard error: 0.4161 on 10 degrees of freedom
 Multiple R-squared:  0.9859,  Adjusted R-squared:  0.9845 
 F-statistic: 700.2 on 1 and 10 DF,  p-value: 1.37e-10
+
 ## Adjust to account for earliest date in dataset
 > (yearMin <- min(gDat$year))
 [1] 1952
 > cFit <- lm(lifeExp ~ I(year-yearMin), cDat)
 > summary(cFit)
-## Output: 
 Call:
   lm(formula = lifeExp ~ I(year - yearMin), data = cDat)
 
@@ -232,18 +227,15 @@ List of 12
   .. .. .. ..- attr(*, "names")= chr [1:2] "lifeExp" "I(year - yearMin)"
  - attr(*, "class")= chr "lm"
 > names(cFit)
-## Output:
 [1] "coefficients"  "residuals"     "effects"       "rank"          "fitted.values" "assign"        "qr"           
 [8] "df.residual"   "xlevels"       "call"          "terms"         "model"  
 
 ## View coefficients and rename
 > coef(cFit)
-## Output:
 (Intercept) I(year - yearMin) 
 68.4138462         0.1841692 
 > cFun <- function(x) coef(lm(lifeExp ~ I(year - yearMin), x))
 > cFun(jDat)
-## Output:
 (Intercept) I(year - yearMin) 
 68.4138462         0.1841692 
 > cFun <- function(x) {
@@ -252,14 +244,12 @@ List of 12
   +     return(estCoefs)
   + }
 > cFun(cDat)
-## Output:
  intercept      slope 
 68.4138462  0.1841692 
 
 ## Scale up 
 > cCoefs <- ddply(gDat, ~country, cFun)
 > str(cCoefs)
-## Output:
 'data.frame':  142 obs. of  3 variables:
 $ country  : Factor w/ 142 levels "Afghanistan",..: 1 2 3 4 5 6 7 8 9 10 ...
 $ intercept: num  29.9 59.2 43.4 32.1 62.7 ...
@@ -287,19 +277,16 @@ $ slope    : num  0.275 0.335 0.569 0.209 0.232 ...
 > library(knitr)
 ## IMAGE AVAILABLE HERE: https://cloud.githubusercontent.com/assets/10501253/7381201/21cf1114-edcf-11e4-9488-25b7a8365cb1.png
 
-
 ## Include continent data in table
 > cCoefs <- ddply(gDat, ~country, cFun)
 > cCoefs <- ddply(gDat, ~country + continent, cFun)
 > str(cCoefs)
-## Output:
 'data.frame':  142 obs. of  4 variables:
 $ country  : Factor w/ 142 levels "Afghanistan",..: 1 2 3 4 5 6 7 8 9 10 ...
 $ continent: Factor w/ 5 levels "Africa","Americas",..: 3 4 1 1 2 5 4 3 3 4 ...
 $ intercept: num  29.9 59.2 43.4 32.1 62.7 ...
 $ slope    : num  0.275 0.335 0.569 0.209 0.232 ...
 > tail(cCoefs)
-## Output:
 country continent intercept       slope
 137          Venezuela  Americas  57.51332  0.32972168
 138            Vietnam      Asia  39.01008  0.67161538
@@ -314,7 +301,6 @@ country continent intercept       slope
 > print(foo, type = "html", include.rownames = FALSE)
 ## IMAGE AVAILABLE HERE: https://cloud.githubusercontent.com/assets/10501253/7381294/03be2e02-edd0-11e4-81d2-a1abee7a6a17.jpg
 
-
 ## Q & A
 > cFunTwoArgs <- function(x, cvShift = 0) {
   +     estCoefs <- coef(lm(lifeExp ~ I(year - cvShift), x))
@@ -323,7 +309,6 @@ country continent intercept       slope
   + }
 > cCoefsSilly <- ddply(gDat, ~country, cFunTwoArgs)
 > head(cCoefsSilly)
-## Output:
       country  intercept     slope
 1 Afghanistan  -507.5343 0.2753287
 2     Albania  -594.0725 0.3346832
@@ -333,7 +318,6 @@ country continent intercept       slope
 6   Australia  -376.1163 0.2277238
 > cCoefsSane <- ddply(gDat, ~country, cFunTwoArgs, cvShift = 1952)
 > head(cCoefsSane)
-## Output:
       country intercept     slope
 1 Afghanistan  29.90729 0.2753287
 2     Albania  59.22913 0.3346832
@@ -343,7 +327,6 @@ country continent intercept       slope
 6   Australia  68.40051 0.2277238
 > cCoefsBest <- ddply(gDat, ~country, cFunTwoArgs, cvShift = min(gDat$year))
 > head(cCoefsBest)
-## Output:
       country intercept     slope
 1 Afghanistan  29.90729 0.2753287
 2     Albania  59.22913 0.3346832
