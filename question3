@@ -66,6 +66,7 @@
 > barplot(table(nc$Best.n[1,]),
 +         xlab="Number of Clusters", ylab="Number of Criteria",
 +         main="Number of Clusters Chosen by 26 Criteria")
+## Corrected misspelling of "Number" in original xlab
 ## IMAGE: https://cloud.githubusercontent.com/assets/10501253/7382063/6585a6b2-edd8-11e4-82a6-1c6f71c229c0.png
 
 > set.seed(1234)
