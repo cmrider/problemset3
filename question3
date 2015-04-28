@@ -64,7 +64,7 @@
  2  1  4 15  1  1  1  1 
 
 > barplot(table(nc$Best.n[1,]),
-+         xlab="Numer of Clusters", ylab="Number of Criteria",
++         xlab="Number of Clusters", ylab="Number of Criteria",
 +         main="Number of Clusters Chosen by 26 Criteria")
 ## IMAGE: https://cloud.githubusercontent.com/assets/10501253/7382063/6585a6b2-edd8-11e4-82a6-1c6f71c229c0.png
 
