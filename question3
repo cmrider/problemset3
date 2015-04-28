@@ -26,6 +26,8 @@
 6    1    14.2  1.76 2.45       15.2       112    3.27       3.39          0.34            1.97  6.75 1.05     2.85    1450
 > df <- scale(wine[-1]) 
 > wssplot(df)
+## IMAGE: https://cloud.githubusercontent.com/assets/10501253/7382004/dcda4fb6-edd7-11e4-85d3-09b4d303202a.png
+
 > library(NbClust)
 > set.seed(1234)
 > nc <- NbClust(df, min.nc=2, max.nc=15, method="kmeans")
@@ -54,13 +56,18 @@
  
  
 ******************************************************************* 
-> table(nc$Best.n[1,])
+## IMAGES: https://cloud.githubusercontent.com/assets/10501253/7382028/1a906e30-edd8-11e4-840a-65a015e49452.png
+           https://cloud.githubusercontent.com/assets/10501253/7382027/1a8e146e-edd8-11e4-9b2c-97159b648e9a.png
 
+> table(nc$Best.n[1,])
  0  1  2  3 10 12 14 15 
  2  1  4 15  1  1  1  1 
+
 > barplot(table(nc$Best.n[1,]),
 +         xlab="Numer of Clusters", ylab="Number of Criteria",
 +         main="Number of Clusters Chosen by 26 Criteria")
+## IMAGE: https://cloud.githubusercontent.com/assets/10501253/7382063/6585a6b2-edd8-11e4-82a6-1c6f71c229c0.png
+
 > set.seed(1234)
 > fit.km <- kmeans(df, 3, nstart=25)
 > fit.km$size
