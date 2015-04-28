@@ -125,6 +125,8 @@ continent   nUniqCountries
 
 ## Plot life expectancy by year for choosen country
 > xyplot(lifeExp ~ year, cDat, type = c("p", "r"))
+## IMAGE AVAILABLE HERE: https://cloud.githubusercontent.com/assets/10501253/7381186/09c8f3f0-edcf-11e4-832a-231ec01c5367.png
+
 ## Fit a linear model
 > cFit <- lm(lifeExp ~ year, cDat)
 > summary(cFit)
@@ -283,6 +285,8 @@ $ slope    : num  0.275 0.335 0.569 0.209 0.232 ...
 ## Output is in HTML, so install/load appropriate package to view the table
 > install.packages("knitr")
 > library(knitr)
+## IMAGE AVAILABLE HERE: https://cloud.githubusercontent.com/assets/10501253/7381201/21cf1114-edcf-11e4-9488-25b7a8365cb1.png
+
 
 ## Include continent data in table
 > cCoefs <- ddply(gDat, ~country, cFun)
@@ -308,6 +312,8 @@ country continent intercept       slope
 > foo <- arrange(foo, intercept)
 > foo <- xtable(foo)
 > print(foo, type = "html", include.rownames = FALSE)
+## IMAGE AVAILABLE HERE: https://cloud.githubusercontent.com/assets/10501253/7381294/03be2e02-edd0-11e4-81d2-a1abee7a6a17.jpg
+
 
 ## Q & A
 > cFunTwoArgs <- function(x, cvShift = 0) {
