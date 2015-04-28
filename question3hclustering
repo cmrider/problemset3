@@ -58,7 +58,7 @@ $`6`
  1  2  3  4  5  6 
  8 11  6  3  5  5 
 
-## View cars in 4-cluster solution
+## View cars in 3-cluster solution
 > cars$Car[groups.3 == 1]
 [1] "Buick Estate Wagon"        "Ford Country Squire Wagon" "Chevy Malibu Wagon"        "Chrysler LeBaron Wagon"   
 [5] "Chevy Caprice Classic"     "Ford LTD"                  "Mercury Grand Marquis"     "Dodge St Regis"           
