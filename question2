@@ -1,0 +1,347 @@
+## Load Gapminder Data
+> gdURL <- "http://www.stat.ubc.ca/~jenny/notOcto/STAT545A/examples/gapminder/data/gapminderDataFiveYear.txt"
+> gDat <- read.delim(file = gdURL)
+## View the structure of gDat to ensure successful import
+> str(gDat)
+## Output:
+'data.frame':  1704 obs. of  6 variables:
+$ country  : Factor w/ 142 levels "Afghanistan",..: 1 1 1 1 1 1 1 1 1 1 ...
+$ year     : int  1952 1957 1962 1967 1972 1977 1982 1987 1992 1997 ...
+$ pop      : num  8425333 9240934 10267083 11537966 13079460 ...
+$ continent: Factor w/ 5 levels "Africa","Americas",..: 3 3 3 3 3 3 3 3 3 3 ...
+$ lifeExp  : num  28.8 30.3 32 34 36.1 ...
+$ gdpPercap: num  779 821 853 836 740 ...
+
+## Data Aggregation
+
+## Store snippet of data (I choose the US, because, well, 'Murica!)
+> (snippet<-subset(gDat, country=="United States"))
+## Output:
+country year       pop continent lifeExp gdpPercap
+1609 United States 1952 157553000  Americas  68.440  13990.48
+1610 United States 1957 171984000  Americas  69.490  14847.13
+1611 United States 1962 186538000  Americas  70.210  16173.15
+1612 United States 1967 198712000  Americas  70.760  19530.37
+1613 United States 1972 209896000  Americas  71.340  21806.04
+1614 United States 1977 220239000  Americas  73.380  24072.63
+1615 United States 1982 232187835  Americas  74.650  25009.56
+1616 United States 1987 242803533  Americas  75.020  29884.35
+1617 United States 1992 256894189  Americas  76.090  32003.93
+1618 United States 1997 272911760  Americas  76.810  35767.43
+1619 United States 2002 287675526  Americas  77.310  39097.10
+1620 United States 2007 301139947  Americas  78.242  42951.65
+
+## Install and load plyr package
+> install.packages("plyr")
+> library(plyr)
+
+## Get Maximum Life Expectancy for Each Continent
+> (maxLeByCont <- ddply(gDat, ~ continent, summarize, maxLifeExp = max(lifeExp)))
+## At first, running the above script returned an error. Had to install and load "Rcpp".
+> install.packages("Rcpp")
+> library(Rcpp)
+> (maxLeByCont <- ddply(gDat, ~ continent, summarize, maxLifeExp = max(lifeExp)))
+## Output:
+  continent maxLifeExp
+1    Africa     76.442
+2  Americas     80.653
+3      Asia     82.603
+4    Europe     81.757
+5   Oceania     81.235
+
+## View structure of data:
+> str(maxLeByCont)
+## Output:
+'data.frame':  5 obs. of  2 variables:
+$ continent : Factor w/ 5 levels "Africa","Americas",..: 1 2 3 4 5
+$ maxLifeExp: num  76.4 80.7 82.6 81.8 81.2
+## Examine the observation names
+> levels(maxLeByCont$continent)
+## Output:
+[1] "Africa"   "Americas" "Asia"     "Europe"   "Oceania" 
+
+## Compute GDP per capita by continent
+> (GDPperCapitabyCont <- ddply(gDat, ~continent, summarize, minGDP = min(gdpPercap)))
+## Output:
+continent     minGDP
+1    Africa   241.1659
+2  Americas  1201.6372
+3      Asia   331.0000
+4    Europe   973.5332
+5   Oceania 10039.5956
+
+## Count the number of countries in gDat:
+> ddply(gDat, ~continent, summarize, nUniqCountries = length(unique(country)))
+## Output:
+continent   nUniqCountries
+1    Africa             52
+2  Americas             25
+3      Asia             33
+4    Europe             30
+5   Oceania              2
+## Without summarize
+> ddply(gDat, ~ continent,
+        function(x) return(c(nUniqCountries = length(unique(x$country)))))
+## Output: 
+continent   nUniqCountries
+1    Africa             52
+2  Americas             25
+3      Asia             33
+4    Europe             30
+5   Oceania              2
+
+## Compute multiple values for each continent
+> ddply(gDat, ~ continent, summarize,
+      minLifeExp = min(lifeExp), maxLifeExp = max(lifeExp),
+      medGdpPercap = median(gdpPercap))
+## Output: 
+  continent minLifeExp maxLifeExp medGdpPercap
+1    Africa     23.599     76.442     1192.138
+2  Americas     37.579     80.653     5465.510
+3      Asia     28.801     82.603     2646.787
+4    Europe     43.585     81.757    12081.749
+5   Oceania     69.120     81.235    17983.304
+
+## Putting It All Together
+## Create sub-data.frame
+> cCountry <- "United States" (c for chelsea, versus j for what I'm assuming was jenny)
+> (cDat <- subset(gDat, country == cCountry))
+## Output: 
+           country year       pop continent lifeExp gdpPercap
+1609 United States 1952 157553000  Americas  68.440  13990.48
+1610 United States 1957 171984000  Americas  69.490  14847.13
+1611 United States 1962 186538000  Americas  70.210  16173.15
+1612 United States 1967 198712000  Americas  70.760  19530.37
+1613 United States 1972 209896000  Americas  71.340  21806.04
+1614 United States 1977 220239000  Americas  73.380  24072.63
+1615 United States 1982 232187835  Americas  74.650  25009.56
+1616 United States 1987 242803533  Americas  75.020  29884.35
+1617 United States 1992 256894189  Americas  76.090  32003.93
+1618 United States 1997 272911760  Americas  76.810  35767.43
+1619 United States 2002 287675526  Americas  77.310  39097.10
+1620 United States 2007 301139947  Americas  78.242  42951.65
+## Before plotting, it was necessary to load "caret"
+> library(caret)
+
+## Plot life expectancy by year for choosen country
+> xyplot(lifeExp ~ year, cDat, type = c("p", "r"))
+## Fit a linear model
+> cFit <- lm(lifeExp ~ year, cDat)
+> summary(cFit)
+## Output:
+Call:
+  lm(formula = lifeExp ~ year, data = cDat)
+
+Residuals:
+  Min       1Q   Median       3Q      Max 
+-0.75723 -0.30394  0.06735  0.19752  0.71108 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -291.08449   13.77740  -21.13 1.25e-09 ***
+year           0.18417    0.00696   26.46 1.37e-10 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.4161 on 10 degrees of freedom
+Multiple R-squared:  0.9859,  Adjusted R-squared:  0.9845 
+F-statistic: 700.2 on 1 and 10 DF,  p-value: 1.37e-10
+## Adjust to account for earliest date in dataset
+> (yearMin <- min(gDat$year))
+[1] 1952
+> cFit <- lm(lifeExp ~ I(year-yearMin), cDat)
+> summary(cFit)
+## Output: 
+Call:
+  lm(formula = lifeExp ~ I(year - yearMin), data = cDat)
+
+Residuals:
+  Min       1Q   Median       3Q      Max 
+-0.75723 -0.30394  0.06735  0.19752  0.71108 
+
+Coefficients:
+                  Estimate Std. Error t value Pr(>|t|)    
+(Intercept)       68.41385    0.22597  302.76  < 2e-16 ***
+I(year - yearMin)  0.18417    0.00696   26.46 1.37e-10 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.4161 on 10 degrees of freedom
+Multiple R-squared:  0.9859,  Adjusted R-squared:  0.9845 
+F-statistic: 700.2 on 1 and 10 DF,  p-value: 1.37e-10
+
+## Examine cFit data
+> str(cFit)
+List of 12
+ $ coefficients : Named num [1:2] 68.414 0.184
+  ..- attr(*, "names")= chr [1:2] "(Intercept)" "I(year - yearMin)"
+ $ residuals    : Named num [1:12] 0.0262 0.1553 -0.0455 -0.4164 -0.7572 ...
+  ..- attr(*, "names")= chr [1:12] "1609" "1610" "1611" "1612" ...
+ $ effects      : Named num [1:12] -254.537 11.0117 -0.0737 -0.4347 -0.7657 ...
+  ..- attr(*, "names")= chr [1:12] "(Intercept)" "I(year - yearMin)" "" "" ...
+ $ rank         : int 2
+ $ fitted.values: Named num [1:12] 68.4 69.3 70.3 71.2 72.1 ...
+  ..- attr(*, "names")= chr [1:12] "1609" "1610" "1611" "1612" ...
+ $ assign       : int [1:2] 0 1
+ $ qr           :List of 5
+  ..$ qr   : num [1:12, 1:2] -3.464 0.289 0.289 0.289 0.289 ...
+  .. ..- attr(*, "dimnames")=List of 2
+  .. .. ..$ : chr [1:12] "1609" "1610" "1611" "1612" ...
+  .. .. ..$ : chr [1:2] "(Intercept)" "I(year - yearMin)"
+  .. ..- attr(*, "assign")= int [1:2] 0 1
+  ..$ qraux: num [1:2] 1.29 1.27
+  ..$ pivot: int [1:2] 1 2
+  ..$ tol  : num 1e-07
+  ..$ rank : int 2
+  ..- attr(*, "class")= chr "qr"
+ $ df.residual  : int 10
+ $ xlevels      : Named list()
+ $ call         : language lm(formula = lifeExp ~ I(year - yearMin), data = jDat)
+ $ terms        :Classes 'terms', 'formula' length 3 lifeExp ~ I(year - yearMin)
+  .. ..- attr(*, "variables")= language list(lifeExp, I(year - yearMin))
+  .. ..- attr(*, "factors")= int [1:2, 1] 0 1
+  .. .. ..- attr(*, "dimnames")=List of 2
+  .. .. .. ..$ : chr [1:2] "lifeExp" "I(year - yearMin)"
+  .. .. .. ..$ : chr "I(year - yearMin)"
+  .. ..- attr(*, "term.labels")= chr "I(year - yearMin)"
+  .. ..- attr(*, "order")= int 1
+  .. ..- attr(*, "intercept")= int 1
+  .. ..- attr(*, "response")= int 1
+  .. ..- attr(*, ".Environment")=<environment: R_GlobalEnv> 
+  .. ..- attr(*, "predvars")= language list(lifeExp, I(year - yearMin))
+  .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
+  .. .. ..- attr(*, "names")= chr [1:2] "lifeExp" "I(year - yearMin)"
+ $ model        :'data.frame':  12 obs. of  2 variables:
+  ..$ lifeExp          : num [1:12] 68.4 69.5 70.2 70.8 71.3 ...
+  ..$ I(year - yearMin):Class 'AsIs'  int [1:12] 0 5 10 15 20 25 30 35 40 45 ...
+  ..- attr(*, "terms")=Classes 'terms', 'formula' length 3 lifeExp ~ I(year - yearMin)
+  .. .. ..- attr(*, "variables")= language list(lifeExp, I(year - yearMin))
+  .. .. ..- attr(*, "factors")= int [1:2, 1] 0 1
+  .. .. .. ..- attr(*, "dimnames")=List of 2
+  .. .. .. .. ..$ : chr [1:2] "lifeExp" "I(year - yearMin)"
+  .. .. .. .. ..$ : chr "I(year - yearMin)"
+  .. .. ..- attr(*, "term.labels")= chr "I(year - yearMin)"
+  .. .. ..- attr(*, "order")= int 1
+  .. .. ..- attr(*, "intercept")= int 1
+  .. .. ..- attr(*, "response")= int 1
+  .. .. ..- attr(*, ".Environment")=<environment: R_GlobalEnv> 
+  .. .. ..- attr(*, "predvars")= language list(lifeExp, I(year - yearMin))
+  .. .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
+  .. .. .. ..- attr(*, "names")= chr [1:2] "lifeExp" "I(year - yearMin)"
+ - attr(*, "class")= chr "lm"
+> names(cFit)
+## Output:
+[1] "coefficients"  "residuals"     "effects"       "rank"          "fitted.values" "assign"        "qr"           
+[8] "df.residual"   "xlevels"       "call"          "terms"         "model"  
+
+## View coefficients and rename
+> coef(cFit)
+## Output:
+(Intercept) I(year - yearMin) 
+68.4138462         0.1841692 
+> cFun <- function(x) coef(lm(lifeExp ~ I(year - yearMin), x))
+> cFun(jDat)
+## Output:
+(Intercept) I(year - yearMin) 
+68.4138462         0.1841692 
+> cFun <- function(x) {
+  +     estCoefs <- coef(lm(lifeExp ~ I(year - yearMin), x))
+  +     names(estCoefs) <- c("intercept", "slope")
+  +     return(estCoefs)
+  + }
+> cFun(cDat)
+## Output:
+ intercept      slope 
+68.4138462  0.1841692 
+
+## Scale up 
+> cCoefs <- ddply(gDat, ~country, cFun)
+> str(cCoefs)
+## Output:
+'data.frame':  142 obs. of  3 variables:
+$ country  : Factor w/ 142 levels "Afghanistan",..: 1 2 3 4 5 6 7 8 9 10 ...
+$ intercept: num  29.9 59.2 43.4 32.1 62.7 ...
+$ slope    : num  0.275 0.335 0.569 0.209 0.232 ...
+> tail(cCoefs)
+               country intercept       slope
+137          Venezuela  57.51332  0.32972168
+138            Vietnam  39.01008  0.67161538
+139 West Bank and Gaza  43.79840  0.60110070
+140        Yemen, Rep.  30.13028  0.60545944
+141             Zambia  47.65803 -0.06042517
+142           Zimbabwe  55.22124 -0.09302098
+
+## Put data in an aesthetically pleasing tab
+> install.packages("xtable")
+> library(xtable)
+
+## Randomly pick countries to display
+> set.seed(713) ## 713 is my birthday
+> foo <- cCoefs[sample(nrow(cCoefs), size = 15), ]
+> foo <- xtable(foo)
+> print(foo, type = "html", include.rownames = FALSE)
+## Output is in HTML, so install/load appropriate package to view the table
+> install.packages("knitr")
+> library(knitr)
+
+## Include continent data in table
+> cCoefs <- ddply(gDat, ~country, cFun)
+> cCoefs <- ddply(gDat, ~country + continent, cFun)
+> str(cCoefs)
+## Output:
+'data.frame':  142 obs. of  4 variables:
+$ country  : Factor w/ 142 levels "Afghanistan",..: 1 2 3 4 5 6 7 8 9 10 ...
+$ continent: Factor w/ 5 levels "Africa","Americas",..: 3 4 1 1 2 5 4 3 3 4 ...
+$ intercept: num  29.9 59.2 43.4 32.1 62.7 ...
+$ slope    : num  0.275 0.335 0.569 0.209 0.232 ...
+> tail(cCoefs)
+## Output:
+country continent intercept       slope
+137          Venezuela  Americas  57.51332  0.32972168
+138            Vietnam      Asia  39.01008  0.67161538
+139 West Bank and Gaza      Asia  43.79840  0.60110070
+140        Yemen, Rep.      Asia  30.13028  0.60545944
+141             Zambia    Africa  47.65803 -0.06042517
+142           Zimbabwe    Africa  55.22124 -0.09302098
+> set.seed(713)
+> foo <- cCoefs[sample(nrow(jCoefs), size = 15), ]
+> foo <- arrange(foo, intercept)
+> foo <- xtable(foo)
+> print(foo, type = "html", include.rownames = FALSE)
+
+## Q & A
+> cFunTwoArgs <- function(x, cvShift = 0) {
+  +     estCoefs <- coef(lm(lifeExp ~ I(year - cvShift), x))
+  +     names(estCoefs) <- c("intercept", "slope")
+  +     return(estCoefs)
+  + }
+> cCoefsSilly <- ddply(gDat, ~country, cFunTwoArgs)
+> head(cCoefsSilly)
+## Output:
+      country  intercept     slope
+1 Afghanistan  -507.5343 0.2753287
+2     Albania  -594.0725 0.3346832
+3     Algeria -1067.8590 0.5692797
+4      Angola  -376.5048 0.2093399
+5   Argentina  -389.6063 0.2317084
+6   Australia  -376.1163 0.2277238
+> cCoefsSane <- ddply(gDat, ~country, cFunTwoArgs, cvShift = 1952)
+> head(cCoefsSane)
+## Output:
+      country intercept     slope
+1 Afghanistan  29.90729 0.2753287
+2     Albania  59.22913 0.3346832
+3     Algeria  43.37497 0.5692797
+4      Angola  32.12665 0.2093399
+5   Argentina  62.68844 0.2317084
+6   Australia  68.40051 0.2277238
+> cCoefsBest <- ddply(gDat, ~country, cFunTwoArgs, cvShift = min(gDat$year))
+> head(cCoefsBest)
+## Output:
+      country intercept     slope
+1 Afghanistan  29.90729 0.2753287
+2     Albania  59.22913 0.3346832
+3     Algeria  43.37497 0.5692797
+4      Angola  32.12665 0.2093399
+5   Argentina  62.68844 0.2317084
+6   Australia  68.40051 0.2277238
