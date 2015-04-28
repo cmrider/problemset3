@@ -14,6 +14,8 @@
 ----------
 
 ###Question 3: H-Clustering and K Means 
-(https://github.com/cmrider/problemset3/blob/master/question3)
+
 - H-Clustering: replication of http://www.stat.berkeley.edu/~s133/Cluster2a.html
+
 - K-Means: replication of http://www.r-statistics.com/2013/08/k-means-clustering-from-r-in-action/
+           (https://github.com/cmrider/problemset3/blob/master/question3kmeans)
