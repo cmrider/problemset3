@@ -1,1 +1,89 @@
+I was having a horrible time understanding what I was doing with these various functions. He kept mentioning survival numbers, 
+but I couldn't see where he was getting those numbers from. After running each the glm, randomForest, and ctree functions, I then
+went back to actually determine where he was getting his numbers from. To do this, I first created a data set that would provide me 
+with understandable survival data: 
+
+> new.titanic=data.frame(survived=1, data=titanic)
+> summary(new.titanic)
+    survived data.survived    data.pclass      data.sex      data.age       data.sibsp    
+ Min.   :1   Min.   :0.000   Min.   :1.000   female:466   Min.   : 0.17   Min.   :0.0000  
+ 1st Qu.:1   1st Qu.:0.000   1st Qu.:2.000   male  :843   1st Qu.:22.00   1st Qu.:0.0000  
+ Median :1   Median :0.000   Median :3.000                Median :29.00   Median :0.0000  
+ Mean   :1   Mean   :0.382   Mean   :2.295                Mean   :29.81   Mean   :0.4989  
+ 3rd Qu.:1   3rd Qu.:1.000   3rd Qu.:3.000                3rd Qu.:35.00   3rd Qu.:1.0000  
+ Max.   :1   Max.   :1.000   Max.   :3.000                Max.   :80.00   Max.   :8.0000  
+ 
+Now I could at least see numbers that meant something, versus coefficients. 466 females survived and 843 males survived. 
+
+Next, I realized that I had run the functions on the complete data set, and not a training set. So divided the data into training
+and testing sets.
+> titanic.train <-floor(0.75 * nrow(titanic.impute)) 
+## creating a set of 75% of the data
+
+> set.seed(981) 
+## still not sure what seed value is, but set it to the number of obs. in titanic.train
+
+> titanictrain<-sample(seq_len(nrow(titanic.impute)), size=titanic.train)
+> train<-titanic.impute[titanictrain, ]
+> test<-titanic.impute[-titanictrain, ]
+## I now have two datasets, train with 981 obs. and test with the remaining 328 obs., totalling 1309, the number of obs. in the
+complete dataset
+
+Now I will go back and complete the exercise to determine if I can find the numbers that he found. 
+
+## GLM: 
+> titanic.survival.train = glm(survived ~ pclass + sex + pclass:sex + age + sibsp, family = binomial(logit), data = train)
+> summary(titanic.survival.train)
+Call:
+glm(formula = survived ~ pclass + sex + pclass:sex + age + sibsp, 
+    family = binomial(logit), data = train)
+
+Deviance Residuals: 
+   Min      1Q  Median      3Q     Max  
+-3.260  -0.663  -0.498   0.480   2.438  
+
+Coefficients:
+               Estimate Std. Error z value Pr(>|z|)    
+(Intercept)      7.9787     0.8189    9.74  < 2e-16 ***
+pclass          -2.2154     0.2579   -8.59  < 2e-16 ***
+sexmale         -6.1189     0.7312   -8.37  < 2e-16 ***
+age             -0.0500     0.0081   -6.17  6.8e-10 ***
+sibsp           -0.3553     0.1043   -3.40  0.00066 ***
+pclass:sexmale   1.4608     0.2738    5.34  9.5e-08 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 1301.1  on 980  degrees of freedom
+Residual deviance:  871.0  on 975  degrees of freedom
+AIC: 883
+
+Number of Fisher Scoring iterations: 5
+
+## randomForest:
+> titanic.survival.train.rf=randomForest(as.factor(survived)~pclass+sex+age+sibsp, data=train,ntree=5000,importance=TRUE)
+> titanic.survival.train.rf
+Call:
+ randomForest(formula = as.factor(survived) ~ pclass + sex + age +      sibsp, data = train, ntree = 5000, importance = TRUE) 
+               Type of random forest: classification
+                     Number of trees: 5000
+No. of variables tried at each split: 2
+
+        OOB estimate of  error rate: 20%
+Confusion matrix:
+    0   1 class.error
+0 546  64        0.10
+1 131 240        0.35
+> importance(titanic.survival.train.rf)
+         0     1 MeanDecreaseAccuracy MeanDecreaseGini
+pclass  81 134.9                  138               48
+sex    205 311.7                  298              121
+age     71  68.0                  111               68
+sibsp   73  -9.7                   59               17
+
+## Run data through Conditional Tree Model
+> titanic.survival.train.ctree = ctree(as.factor(survived) ~ pclass + sex + age + sibsp, data=train)
+> plot(titanic.survival.train.ctree)
+IMAGE: 
 
