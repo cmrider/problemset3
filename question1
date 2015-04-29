@@ -85,5 +85,6 @@ sibsp   73  -9.7                   59               17
 ## Run data through Conditional Tree Model
 > titanic.survival.train.ctree = ctree(as.factor(survived) ~ pclass + sex + age + sibsp, data=train)
 > plot(titanic.survival.train.ctree)
-IMAGE: 
+IMAGE: https://cloud.githubusercontent.com/assets/10501253/7402470/24d69d2a-ee9a-11e4-9b52-048d84c9278a.png
+
 
